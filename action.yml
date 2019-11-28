@@ -12,5 +12,5 @@ runs:
   args:
     - ${{ inputs.args }}
 branding:
-  icon: 'box'  
+  icon: 'box'
   color: 'green'

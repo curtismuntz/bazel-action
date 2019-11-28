@@ -1,0 +1,37 @@
+name: murtis
+
+on:
+  push:
+    branches:
+      - bazelisk_1.1.0
+
+jobs:
+  bazelisk_build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        bazelisk_version:
+        - 1.1.0
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: build
+      run: |
+        docker build \
+            --tag murtis/bazel-action:bazelisk_${{ matrix.bazelisk_version }} \
+            --build-arg bazelisk_version=${{ matrix.bazelisk_version }} \
+            --file Dockerfile.bazelisk \
+            .
+
+    - name: login to registry
+      env:
+        docker_password: ${{ secrets.docker_password }}
+      run: |
+        docker login \
+            -u murtis \
+            -p ${docker_password}
+
+    - name: push
+      run: |
+        docker push murtis/bazel-action:bazelisk_${{ matrix.bazelisk_version }}

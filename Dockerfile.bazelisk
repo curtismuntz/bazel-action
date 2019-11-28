@@ -1,0 +1,29 @@
+FROM openjdk:11
+
+ARG BAZELISK_VERSION=1.1.0
+# TODO(curtismuntz) actually support shas
+ARG BAZELISK_SHA=d20be9dfb311c596efd1579d30c0fdab0d5ba62ec76b316ada3a8e69f4194bbe
+
+RUN apt-get update && apt-get install -y \
+        g++ \
+        zlib1g-dev \
+        bash-completion \
+        patch \
+        python3 \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN set -ex; \
+    curl \
+    --fail \
+    --silent \
+    --show-error \
+    --location \
+    --output /tmp/bazelisk-linux-amd64 \
+    "https://github.com/bazelbuild/bazelisk/releases/download/v${BAZELISK_VERSION}/bazelisk-linux-amd64" \
+    && echo ${BAZELISK_SHA} /tmp/bazelisk-linux-amd64 | sha256sum --check \
+    && mv /tmp/bazelisk-linux-amd64 /usr/bin/bazel \
+    && chmod +x /usr/bin/bazel
+
+COPY ./entrypoint.sh /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
